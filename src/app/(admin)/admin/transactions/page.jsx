@@ -5,7 +5,7 @@ import TransactionsClientPage from "./TransactionsClientPage";
 export default async function AdminTransactionsPage({ searchParams = {} }) {
   try {
     // ✅ PERBAIKAN: Await searchParams untuk Next.js 15+
-    const resolvedSearchParams = await searchParams;
+    // const resolvedSearchParams = searchParams;
 
     // 1. Ambil semua data dari server
     const [allTransactions, allUsers] = await Promise.all([getAllTransactions(), getAllUsers()]);
