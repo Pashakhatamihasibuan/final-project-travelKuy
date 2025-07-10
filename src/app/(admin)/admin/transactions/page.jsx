@@ -1,12 +1,11 @@
-// src/app/(admin)/admin/transactions/page.js
+// src/app/(admin)/admin/transactions/page.jsx
+
 import { getAllTransactions, getAllUsers } from "@/lib/server-data";
 import TransactionsClientPage from "./TransactionsClientPage";
 
 export default async function AdminTransactionsPage({ searchParams = {} }) {
+  // searchParams sudah objek
   try {
-    // ✅ PERBAIKAN: Await searchParams untuk Next.js 15+
-    // const resolvedSearchParams = searchParams;
-
     // 1. Ambil semua data dari server
     const [allTransactions, allUsers] = await Promise.all([getAllTransactions(), getAllUsers()]);
 
@@ -24,11 +23,13 @@ export default async function AdminTransactionsPage({ searchParams = {} }) {
     transactionsWithUserData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     // 5. Terapkan filter status jika ada di URL
-    const statusFilter = resolvedSearchParams.status;
+    // Gunakan searchParams secara langsung di sini
+    const statusFilter = searchParams.status;
     const filteredTransactions = statusFilter ? transactionsWithUserData.filter((t) => t.status === statusFilter.toLowerCase()) : transactionsWithUserData;
 
     // 6. Implementasi paginasi pada data yang sudah difilter
-    const page = resolvedSearchParams.page ?? "1";
+    // Gunakan searchParams secara langsung di sini
+    const page = searchParams.page ?? "1";
     const currentPage = Math.max(1, Number(page));
     const transactionsPerPage = 15;
     const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
@@ -55,7 +56,6 @@ export default async function AdminTransactionsPage({ searchParams = {} }) {
   }
 }
 
-// ✅ PERBAIKAN: Tambahkan metadata untuk SEO
 export const metadata = {
   title: "Admin - All Transactions",
   description: "Manage all transactions in the admin panel",
