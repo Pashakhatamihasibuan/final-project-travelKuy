@@ -1,18 +1,20 @@
-import {Inter} from "next/font/google";
+import { Inter } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
-const inter = Inter({subsets: ["latin"]});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-    title: "TravelKuy - Jelajahi Dunia, Temukan Dirimu",
-    description:
-        "Platform booking travel untuk petualangan tak terlupakan. Temukan promo dan aktivitas menarik di seluruh dunia.",
+  title: "TravelKuy - Jelajahi Dunia, Temukan Dirimu",
+  description: "Platform booking travel untuk petualangan tak terlupakan. Temukan promo dan aktivitas menarik di seluruh dunia.",
 };
 
-export default function RootLayout({children}) {
-    return (
-        <html lang="id">
-        <body className={inter.className} suppressHydrationWarning={true}>{children}</body>
-        </html>
-    );
+export default function RootLayout({ children }) {
+  return (
+    <html lang="id">
+      <body className={inter.className} suppressHydrationWarning={true}>
+        {children}
+      </body>
+    </html>
+  );
 }
