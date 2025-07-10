@@ -62,13 +62,12 @@ export async function authenticate() {
   }
 }
 
-// --- Aksi Otentikasi ---
 export async function login(prevState, formData) {
   const email = formData.get("email");
   const password = formData.get("password");
 
   if (!email || !password) {
-    return { status: "error", message: "Email and password are required" };
+    return { status: "error", message: "Email dan password harus diisi" }; // Mengembalikan pesan asli
   }
 
   try {
@@ -84,12 +83,12 @@ export async function login(prevState, formData) {
     const result = await response.json();
 
     if (!response.ok) {
-      return { status: "error", message: result.message || "Login failed" };
+      return { status: "error", message: result.message || "Login gagal" }; // Mengembalikan pesan asli
     }
 
-    const cookieStore = await cookies();
+    const cookieStore = cookies(); // Tidak perlu await di sini
 
-    // Set a server-only, secure cookie for authentication. This is the only token you need.
+    // Server-side token (HTTP-only for security)
     cookieStore.set("token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -98,9 +97,20 @@ export async function login(prevState, formData) {
       path: "/",
     });
 
-    // Storing user data in a separate cookie is fine if needed, but keep it httpOnly.
+    // Client-side accessible token (for API calls) - PASTIKAN BARIS INI ADA!
+    cookieStore.set("client_token", result.token, {
+      httpOnly: false, // ACCESSIBLE FROM CLIENT-SIDE
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+    });
+
+    // Simpan data pengguna (opsional, tapi jika digunakan di client, pertimbangkan httpOnly: false atau ambil dari JWT decode di client)
+    // Untuk konsistensi dan keamanan yang lebih baik, jika user info dibutuhkan di client, bisa di-decode dari client_token
+    // atau pastikan data user juga tidak httpOnly jika memang diakses client.
     cookieStore.set("user", JSON.stringify(result.data), {
-      httpOnly: true,
+      httpOnly: true, // Biarkan ini httpOnly jika hanya digunakan server-side atau untuk validasi awal.
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 7 days
@@ -108,13 +118,24 @@ export async function login(prevState, formData) {
     });
   } catch (error) {
     console.error("Login error:", error);
-    return { status: "error", message: "An unexpected error occurred during login" };
+    return { status: "error", message: "Terjadi kesalahan saat login" }; // Mengembalikan pesan asli
   }
 
-  // Redirect logic
+  // Redirect logic remains the same...
   const callbackUrl = formData.get("callbackUrl");
+  const loginIntent = formData.get("login_intent");
+  let redirectUrl = "/";
+
+  if (loginIntent === "add_to_cart" && callbackUrl) {
+    redirectUrl = callbackUrl;
+  } else if (loginIntent === "cart_access") {
+    redirectUrl = "/cart";
+  } else if (callbackUrl) {
+    redirectUrl = callbackUrl;
+  }
+
   revalidatePath("/", "layout"); // Revalidate the entire layout to update UI everywhere
-  redirect(callbackUrl || "/");
+  redirect(redirectUrl); // Pastikan ini mengarah ke redirectUrl
 }
 
 export async function register(prevState, formData) {
